@@ -72,19 +72,13 @@ class StripeDialog : DialogFragment() {
 
         if (mCardInputWidget.validateAllFields()) {
 
-            mCardInputWidget.card?.let { card ->
+            mCardInputWidget.cardParams?.let { card ->
 
                 view?.findViewById<View>(R.id.progress)?.visibility = View.VISIBLE
                 view?.findViewById<View>(R.id.buttonSave)?.visibility = View.GONE
 
-                val paymentMethodParamsCard = card.toPaymentMethodParamsCard()
-                val paymentMethodCreateParams = PaymentMethodCreateParams.create(
-                    paymentMethodParamsCard,
-                    PaymentMethod.BillingDetails.Builder().build()
-                )
-
                 stripeInstance.createPaymentMethod(
-                    paymentMethodCreateParams,
+                    PaymentMethodCreateParams.createCard(card),
                     null,
                     arguments?.getString("stripeAccountId", null),
                     object : ApiResultCallback<PaymentMethod> {
