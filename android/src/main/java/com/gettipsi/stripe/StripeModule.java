@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -375,8 +376,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
     attachPaymentResultActivityListener(promise);
 
     Activity activity = getCurrentActivity();
-    if (activity != null) {
-      mStripe.confirmPayment(activity, extractConfirmPaymentIntentParams(options));
+    if (activity != null && activity instanceof ComponentActivity) {
+      mStripe.confirmPayment((ComponentActivity)activity, extractConfirmPaymentIntentParams(options));
     }
   }
 
@@ -386,8 +387,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
     String clientSecret = options.getString(CLIENT_SECRET);
     Activity activity = getCurrentActivity();
-    if (activity != null) {
-      mStripe.authenticatePayment(activity, clientSecret);
+    if (activity != null && activity instanceof ComponentActivity) {
+      mStripe.handleNextActionForPayment((ComponentActivity)activity, clientSecret);
     }
   }
 
@@ -396,8 +397,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
     attachSetupResultActivityListener(promise);
 
     Activity activity = getCurrentActivity();
-    if (activity != null) {
-      mStripe.confirmSetupIntent(activity, extractConfirmSetupIntentParams(options));
+    if (activity != null && activity instanceof ComponentActivity) {
+      mStripe.confirmSetupIntent((ComponentActivity)activity, extractConfirmSetupIntentParams(options));
     }
   }
 
@@ -407,8 +408,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
     String clientSecret = options.getString(CLIENT_SECRET);
     Activity activity = getCurrentActivity();
-    if (activity != null) {
-      mStripe.authenticateSetup(activity, clientSecret);
+    if (activity != null && activity instanceof ComponentActivity) {
+      mStripe.handleNextActionForSetupIntent((ComponentActivity)activity, clientSecret);
     }
   }
 
@@ -483,9 +484,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
     if (paymentMethod != null) {
       csip = ConfirmSetupIntentParams.create(extractPaymentMethodCreateParams(paymentMethod),
-        clientSecret, returnURL);
+        clientSecret);
     } else if (paymentMethodId != null) {
-      csip = ConfirmSetupIntentParams.create(paymentMethodId, clientSecret, returnURL);
+      csip = ConfirmSetupIntentParams.create(paymentMethodId, clientSecret);
     }
 
     ArgCheck.nonNull(csip);
@@ -503,25 +504,23 @@ public class StripeModule extends ReactContextBaseJavaModule {
     // ReadableMap source = options.getMap("source");
     // String sourceId = getStringOrNull(options,"sourceId");
 
-    String returnURL = getStringOrNull(options, "returnURL");
-    if (returnURL ==  null) {
-      returnURL = "stripejs://use_stripe_sdk/return_url";
-    }
+    // https://github.com/stripe/stripe-android/blob/v16.10.2/payments-core/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.kt#L599
+//    String returnURL = getStringOrNull(options, "returnURL");
+//    if (returnURL ==  null) {
+//      returnURL = "stripejs://use_stripe_sdk/return_url";
+//    }
     boolean savePaymentMethod = getBooleanOrNull(options, "savePaymentMethod", false);
-
-    // TODO support extra params in each of the create methods below
-    Map<String, Object> extraParams = null;
 
     // Create with Payment Method
     if (paymentMethod != null) {
 
       PaymentMethodCreateParams pmcp = extractPaymentMethodCreateParams(paymentMethod);
-      cpip = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(pmcp, clientSecret, returnURL, savePaymentMethod, extraParams);
+      cpip = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(pmcp, clientSecret, savePaymentMethod);
 
     // Create with Payment Method ID
     } else if (paymentMethodId != null) {
 
-      cpip = ConfirmPaymentIntentParams.createWithPaymentMethodId(paymentMethodId, clientSecret, returnURL, savePaymentMethod, extraParams);
+      cpip = ConfirmPaymentIntentParams.createWithPaymentMethodId(paymentMethodId, clientSecret, savePaymentMethod);
 
     // Create with Source
     /**
@@ -551,8 +550,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
     This branch can be used if the client secret refers to a payment intent that already
     has payment method information and just needs to be confirmed.
     */
+    // https://github.com/stripe/stripe-android/blob/v16.10.2/payments-core/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.kt#L599
     } else {
-      cpip = ConfirmPaymentIntentParams.create(clientSecret, returnURL);
+      cpip = ConfirmPaymentIntentParams.create(clientSecret);
     }
 
     cpip.withShouldUseStripeSdk(true);
