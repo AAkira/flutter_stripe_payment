@@ -397,6 +397,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
     attachSetupResultActivityListener(promise);
 
     Activity activity = getCurrentActivity();
+    println('hoge---------');
+    println(activity instanceof ComponentActivity);
     if (activity != null && activity instanceof ComponentActivity) {
       mStripe.confirmSetupIntent((ComponentActivity)activity, extractConfirmSetupIntentParams(options));
     }
