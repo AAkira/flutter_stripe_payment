@@ -375,9 +375,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
   public void confirmPaymentIntent(final ReadableMap options, final Promise promise) {
     attachPaymentResultActivityListener(promise);
 
-    Activity activity = getCurrentActivity();
-    if (activity != null && activity instanceof ComponentActivity) {
-      mStripe.confirmPayment((ComponentActivity)activity, extractConfirmPaymentIntentParams(options));
+    ComponentActivity activity = (ComponentActivity)getCurrentActivity();
+    if (activity != null) {
+      mStripe.confirmPayment(activity, extractConfirmPaymentIntentParams(options));
     }
   }
 
@@ -386,9 +386,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
     attachPaymentResultActivityListener(promise);
 
     String clientSecret = options.getString(CLIENT_SECRET);
-    Activity activity = getCurrentActivity();
-    if (activity != null && activity instanceof ComponentActivity) {
-      mStripe.handleNextActionForPayment((ComponentActivity)activity, clientSecret);
+    ComponentActivity activity = (ComponentActivity)getCurrentActivity();
+    if (activity != null ) {
+      mStripe.handleNextActionForPayment(activity, clientSecret);
     }
   }
 
@@ -396,9 +396,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
   public void confirmSetupIntent(final ReadableMap options, final Promise promise) {
     attachSetupResultActivityListener(promise);
 
-    Activity activity = getCurrentActivity();
-    if (activity != null && activity instanceof ComponentActivity) {
-      mStripe.confirmSetupIntent((ComponentActivity)activity, extractConfirmSetupIntentParams(options));
+    ComponentActivity activity = (ComponentActivity)getCurrentActivity();
+    if (activity != null) {
+      mStripe.confirmSetupIntent(activity, extractConfirmSetupIntentParams(options));
     }
   }
 
@@ -407,9 +407,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
     attachSetupResultActivityListener(promise);
 
     String clientSecret = options.getString(CLIENT_SECRET);
-    Activity activity = getCurrentActivity();
-    if (activity != null && activity instanceof ComponentActivity) {
-      mStripe.handleNextActionForSetupIntent((ComponentActivity)activity, clientSecret);
+    ComponentActivity activity = (ComponentActivity)getCurrentActivity();
+    if (activity != null) {
+      mStripe.handleNextActionForSetupIntent(activity, clientSecret);
     }
   }
 
